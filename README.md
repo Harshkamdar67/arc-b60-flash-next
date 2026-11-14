@@ -31,12 +31,14 @@ history of how they were reached are in [results/RESULTS.md](results/RESULTS.md)
 
 ## Demo
 
-[demo/flashnext-b60-demo.mp4](demo/flashnext-b60-demo.mp4) is a 90-second screen recording of `bench/demo.py`, real time
-and uncut, taken while the engine ran at below-normal priority with other programs on the machine. In that take:
-one stream 350 tokens at 35.0 tok/s; two equal streams 14.6 and 15.4 tok/s; a priority-4 call arriving while a chat
-request is generating: the call 273 tokens at 24.0 tok/s, the chat slowed to a few tokens a second and then back up
-(900 tokens at 19.9 tok/s overall). The figure shown while a stream is running is streamed pieces per second, a floor;
-the DONE line is the server's token count.
+![results](demo/results-card.png)
+
+[demo/flashnext-b60-demo.mp4](demo/flashnext-b60-demo.mp4) is a 45-second screen recording of `bench/webdemo/demo.html`,
+real time, taken while the engine ran at below-normal priority with other programs busy on the machine. In that take:
+one chat, 340 tokens at 35.3 tok/s, first word after 1.3 s; then a priority-4 call arriving while a chat request is
+generating: the call's first word after 1.7 s, 283 tokens at 20.7 tok/s, the chat at about 2 tok/s meanwhile and back
+above 20 once the call ends. The large number is streamed pieces per second while a stream runs (a little low) and
+the server's token count when it ends. `bench/demo.py` is a terminal version of the same thing.
 
 ## What is in here
 
@@ -46,7 +48,7 @@ the DONE line is the server's token count.
 - `config/strata-iq3_s-b60-lanes-esp.json`: the server config. Paths are placeholders, change them to yours.
 - `bench/fnbench.py`: N streams with a prompt of a given size, optional priority, text check.
 - `bench/calltest.py`: short high-priority turns arriving while a long low-priority request runs.
-- `bench/demo.py`: the terminal demo.
+- `bench/demo.py`: the terminal demo. `bench/webdemo/`: the page in the video (`python serve.py`, then open http://127.0.0.1:8099).
 - `results/`: results log and the draft report on the corrupted-output cause.
 
 ## Setup
