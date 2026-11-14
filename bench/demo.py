@@ -1,7 +1,7 @@
 """Terminal demo against a local OpenAI-compatible server: live streaming with measured speeds.
 
 usage: demo.py BASE_URL
-Scene 1: one stream. Scene 2: two equal streams. Scene 3: a priority-4 stream beside a normal one.
+Scene 1: one stream. Scene 2: two equal streams. Scene 3: a priority-4 request arriving while a normal one is generating.
 The live figure is streamed pieces per second (a piece is one token or more, so it is a floor); the line
 printed when a stream ends is completion_tokens and wall time from the server's usage block.
 """
@@ -15,8 +15,8 @@ TITLE = "Qwen3.8-Flash-Next (IQ3_S)  |  one Intel Arc Pro B60 24 GB  |  Windows 
 
 
 class Stream:
-    def __init__(self, name, prompt, max_tokens, priority=0):
-        self.name, self.prompt, self.max_tokens, self.priority = name, prompt, max_tokens, priority
+    def __init__(self, name, prompt, max_tokens, priority=0, delay=0.0):
+        self.name, self.prompt, self.max_tokens, self.priority, self.delay = name, prompt, max_tokens, priority, delay
         self.text, self.pieces, self.t0, self.first, self.last, self.ct, self.done = "", 0, None, None, None, 0, False
 
     def run(self):
@@ -26,6 +26,7 @@ class Stream:
         if self.priority:
             body["priority"] = self.priority
         req = urllib.request.Request(BASE + "/v1/chat/completions", data=json.dumps(body).encode(), headers={"Content-Type": "application/json"})
+        time.sleep(self.delay)
         self.t0 = time.perf_counter()
         with urllib.request.urlopen(req, timeout=3600) as r:
             for raw in r:
@@ -44,6 +45,8 @@ class Stream:
         self.done = True
 
     def status(self):
+        if self.t0 is None:
+            return "not sent yet"
         if not self.first:
             return "reading the prompt ..."
         if self.done and self.ct and self.last > self.first:
@@ -84,7 +87,7 @@ def show(scene, streams, hold=3.0):
             end = end or time.perf_counter()
             if time.perf_counter() - end > hold:
                 break
-        time.sleep(0.07)
+        time.sleep(0.1)
 
 
 P_BIKE = "Explain in detail how a bicycle stays upright while moving. Cover steering geometry, gyroscopic effects and rider input."
@@ -95,5 +98,5 @@ P_CALL = ("You are a phone support agent for a small online shop. A customer say
 sys.stdout.write("\x1b[2J")
 show("1 / 3   one stream", [Stream("stream A", P_BIKE, 350)])
 show("2 / 3   two streams, equal priority", [Stream("stream A", P_BIKE, 280), Stream("stream B", P_CODE, 280)])
-show("3 / 3   priority lanes: the call is sent with \"priority\": 4, the chat keeps going and speeds up when the call ends",
-     [Stream("CALL  (priority 4)", P_CALL, 300, 4), Stream("CHAT  (priority 0)", P_CODE, 900)], hold=4.0)
+show("3 / 3   priority lanes: a call arrives with \"priority\": 4 while the chat is generating; the chat speeds up again after",
+     [Stream("CALL  (priority 4)", P_CALL, 300, 4, delay=4.0), Stream("CHAT  (priority 0)", P_CODE, 900)], hold=4.0)

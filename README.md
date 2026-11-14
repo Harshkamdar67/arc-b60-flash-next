@@ -11,7 +11,7 @@ Machine: i7-12700K, 128 GB DDR4-2667, Arc Pro B60 24 GB, Windows 11. Measured 20
 
 | case | result |
 |---|---|
-| one stream | 36-45 tok/s decode |
+| one stream | 35-45 tok/s decode |
 | two equal streams | 15-25 tok/s each |
 | one request sent with `"priority": 1` | it runs at 28-29 tok/s, the other at 5-8 |
 | one request sent with `"priority": 4` | it runs at 29-36 tok/s, the other at about 2, and back to 27-35 when it ends |
@@ -28,6 +28,15 @@ Machine: i7-12700K, 128 GB DDR4-2667, Arc Pro B60 24 GB, Windows 11. Measured 20
 Other programs were running during most of these runs (CPU load 7-50% before a run), and in the last ones the engine
 ran at below-normal priority. Nothing was measured on a fully idle machine after the last change. Raw numbers and the
 history of how they were reached are in [results/RESULTS.md](results/RESULTS.md).
+
+## Demo
+
+[demo/flashnext-b60-demo.mp4](demo/flashnext-b60-demo.mp4) is a 90-second screen recording of `bench/demo.py`, real time
+and uncut, taken while the engine ran at below-normal priority with other programs on the machine. In that take:
+one stream 350 tokens at 35.0 tok/s; two equal streams 14.6 and 15.4 tok/s; a priority-4 call arriving while a chat
+request is generating: the call 273 tokens at 24.0 tok/s, the chat slowed to a few tokens a second and then back up
+(900 tokens at 19.9 tok/s overall). The figure shown while a stream is running is streamed pieces per second, a floor;
+the DONE line is the server's token count.
 
 ## What is in here
 
